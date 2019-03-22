@@ -28,10 +28,6 @@ findDirections :: [Point2D] -> [Direction]
 findDirections (a:b:c:xs) = findDirection a b c : findDirections (b:c:xs)
 findDirections _ = []
 
--- Subtract Point2D
-(.-.) :: Point2D -> Point2D -> Point2D
-a .-. b = Point2D (xpos a - xpos b) (xpos b - xpos a)
-
 -- Euler distance between a and b
 eulDist :: Point2D -> Point2D -> Float
 eulDist a b = sqrt ((xpos b- xpos a)**2 + (ypos b - ypos a)**2)
@@ -59,16 +55,27 @@ findHull xs = findHull' xs []
                            | otherwise = findHull' pts (pt : stack)
                     findHull' [] stack = stack
 
+-- Find the point with lowest y value in first argument. Prefer a point with lowest x value.
+findLowest :: [Point2D] -> Point2D
+findLowest xs = foldr step (head xs) xs
+                where step pt acc 
+                        | ypos pt < ypos acc  = pt
+                        | ypos pt == ypos acc = if xpos pt < xpos acc then pt else acc
+                        | otherwise           = acc
+
+-- Remove points with duplicate polar angles relative to p. Prefer points farther away.
+removeDups :: Point2D -> [Point2D] -> [Point2D]
+removeDups p xs = foldr step [] xs
+                  where step x acc 
+                         | null acc  = x : acc
+                         | compareAngle p x (head acc) == EQ
+                                     = if (eulDist p x) > (eulDist p (head acc))
+                                         then x : acc
+                                         else []
+                         | otherwise = x : acc
+
 grahamScan :: [Point2D] -> [Point2D]
-grahamScan xs = let y' = foldr (\x acc -> if ypos x < ypos acc then x else acc) (last xs) xs 
+grahamScan xs = let y' = findLowest xs
                     sort' = sortBy (compareAngle y')
-                    removeDups =  let step x acc
-                                        | null acc  = x : acc
-                                        | compareAngle y' x (head acc) == EQ
-                                                    = if (eulDist y' x) < (eulDist y' (head acc))
-                                                     then x : acc
-                                                     else []
-                                        | otherwise = x : acc
-                                  in foldr step []
-                in  findHull $ removeDups $ sort' xs
+                in  findHull $ removeDups y' $ sort' xs
 
