@@ -54,3 +54,4 @@ findDirection a b c = let crossP = ((xpos b - xpos a)*(ypos c - ypos a) -
 findDirections :: [Point2D] -> [Direction]
 findDirections (a:b:c:xs) = findDirection a b c : findDirections (b:c:xs)
 findDirections _ = []
+

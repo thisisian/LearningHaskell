@@ -82,7 +82,25 @@ myGroupBy f xs = foldr step [] xs
                                                 then ([x] ++ head acc) : tail acc
                                                 else [x] : acc
 
+myAny :: (a -> Bool) -> [a] -> Bool
+myAny p = foldr step False
+        where step x False = p x
+              step x True  = True
 
-                
+myCycle :: [a] -> [a]
+myCycle xs = foldr step (myCycle xs) xs
+             where step x acc = x : acc 
 
+-- Bug: Will have leading empty string if there is leading whitespace
+myWords :: String -> [String]
+myWords = foldr step []
+          where step x []      = if isSpace x then [] else [[x]]
+                step x (y:ys)
+                   | isSpace x = if null y 
+                                     then (y:ys) 
+                                     else []:(y:ys)
+                   | otherwise = (x:y):ys
 
+myUnlines :: [String] -> String
+myUnlines xs = foldr step [] xs
+               where step x acc = (x ++ "\n") ++ acc
