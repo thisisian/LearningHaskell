@@ -1,6 +1,7 @@
 module Prettify where
 
 import Prelude hiding ((<>))
+import Data.List (replicate)
 import Numeric
 
 data Doc = Empty
@@ -69,7 +70,7 @@ w `fits` (c:cs)    = (w - 1) `fits` cs
 --           where fill col []     = empty
 --                 fill col (x:xs) = case of x
 --                    | a `Concat` b -> fill 
---                    | Line -> (text . take (w - col) $ repeat ' ') : Line
+--                    | Line -> (text $ replicate (w - col) ' ') : Line
 --                    | other -> other
 
 pretty :: Int -> Doc -> String
